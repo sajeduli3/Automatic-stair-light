@@ -7,6 +7,14 @@
  #include <avr/power.h> // Required for 16 MHz Adafruit Trinket
 #endif
 
+// defines pins numbers
+const int trigPin = 9;
+const int echoPin = 10;
+// defines variables
+long duration;
+int distance;
+
+
 // Which pin on the Arduino is connected to the NeoPixels?
 #define PIN        3 // On Trinket or Gemma, suggest changing this to 1
 
@@ -19,9 +27,15 @@
 // strandtest example for more information on possible values.
 Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
-#define DELAYVAL 15 // Time (in milliseconds) to pause between pixels
+#define DELAYVAL 50 // Time (in milliseconds) to pause between pixels
 
 void setup() {
+
+   pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
+   pinMode(echoPin, INPUT); // Sets the echoPin as an Input
+   Serial.begin(9600);
+
+  
   // These lines are specifically to support the Adafruit Trinket 5V 16 MHz.
   // Any other board, you can remove this part (but no harm leaving it):
 #if defined(__AVR_ATtiny85__) && (F_CPU == 16000000)
@@ -30,11 +44,26 @@ void setup() {
   // END of Trinket-specific code.
 
   pixels.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
-  pixels.setBrightness (200);
+  pixels.setBrightness (255);
 }
 
 void loop() {
   pixels.clear(); // Set all pixel colors to 'off'
+
+  digitalWrite(trigPin, LOW);
+delayMicroseconds(2);
+// Sets the trigPin on HIGH state for 10 micro seconds
+digitalWrite(trigPin, HIGH);
+delayMicroseconds(10);
+digitalWrite(trigPin, LOW);
+// Reads the echoPin, returns the sound wave travel time in microseconds
+duration = pulseIn(echoPin, HIGH);
+// Calculating the distance
+distance= duration*0.034/2;
+// Prints the distance on the Serial Monitor
+Serial.print("Distance: ");
+Serial.println(distance);
+if (distance <= 10){
 
   // The first NeoPixel in a strand is #0, second is 1, all the way up
   // to the count of pixels minus one.
@@ -48,13 +77,13 @@ void loop() {
 
     delay (DELAYVAL); // Pause before next pass through loop
   }
-  delay (2000);
+  delay (5000);
   for(int i=0; i<NUMPIXELS; i++)
   {
     pixels.setPixelColor(i, pixels.Color(0,0,0));
     pixels.show();
     delay (DELAYVAL);
-  }
-  delay(2000);
+  }}
+ 
   
 }
