@@ -2,4 +2,4 @@
 Arduino Control Stair Light  Using Addressable Led &amp; Ultrasonic Sensor
 
 
-https://github.com/sajeduli3/Automatic-stair-light/blob/master/Stair%20light.jpg
+![Stair light](https://user-images.githubusercontent.com/50138015/116307571-5073db80-a7c8-11eb-855f-89085ba48865.jpg)
