@@ -1,89 +1,115 @@
-// NeoPixel Ring simple sketch (c) 2013 Shae Erisson
-// Released under the GPLv3 license to match the rest of the
-// Adafruit NeoPixel library
-
 #include <Adafruit_NeoPixel.h>
 #ifdef __AVR__
  #include <avr/power.h> // Required for 16 MHz Adafruit Trinket
 #endif
 
-// defines pins numbers
-const int trigPin = 9;
-const int echoPin = 10;
-// defines variables
-long duration;
-int distance;
+#define trigPin1 8
+#define echoPin1 9
+#define trigPin2 10
+#define echoPin2 11
+#define PIN 3
+#define NUMPIXELS 313
 
 
-// Which pin on the Arduino is connected to the NeoPixels?
-#define PIN        3 // On Trinket or Gemma, suggest changing this to 1
+long duration, distance, RightSensor,BackSensor,FrontSensor,LeftSensor;
+Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUMPIXELS , PIN, NEO_GRB + NEO_KHZ800);
+#define DELAYVAL 20
+void setup()
+{
+Serial.begin (9600);
 
-// How many NeoPixels are attached to the Arduino?
-#define NUMPIXELS 60 // Popular NeoPixel ring size
+strip.begin();
+strip.setBrightness(50);
+pinMode(trigPin1, OUTPUT);
+pinMode(echoPin1, INPUT);
+pinMode(trigPin2, OUTPUT);
+pinMode(echoPin2, INPUT);
 
-// When setting up the NeoPixel library, we tell it how many pixels,
-// and which pin to use to send signals. Note that for older NeoPixel
-// strips you might need to change the third parameter -- see the
-// strandtest example for more information on possible values.
-Adafruit_NeoPixel pixels(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
-
-#define DELAYVAL 50 // Time (in milliseconds) to pause between pixels
-
-void setup() {
-
-   pinMode(trigPin, OUTPUT); // Sets the trigPin as an Output
-   pinMode(echoPin, INPUT); // Sets the echoPin as an Input
-   Serial.begin(9600);
-
-  
-  // These lines are specifically to support the Adafruit Trinket 5V 16 MHz.
-  // Any other board, you can remove this part (but no harm leaving it):
-#if defined(__AVR_ATtiny85__) && (F_CPU == 16000000)
-  clock_prescale_set(clock_div_1);
-#endif
-  // END of Trinket-specific code.
-
-  pixels.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
-  pixels.setBrightness (255);
 }
 
-void loop() {
-  pixels.clear(); // Set all pixel colors to 'off'
+void rainbowCycle(uint8_t wait) {
+  uint16_t i, j;
 
-  digitalWrite(trigPin, LOW);
+  for(j=0; j<312*1; j++) { // 5 cycles of all colors on wheel
+    for(i=0; i< strip.numPixels(); i++) {
+      strip.setPixelColor(i, Wheel(((i * 312 / strip.numPixels()) + j) & 255));
+    }
+    strip.show();
+    delay(wait);
+  }
+}
+uint32_t Wheel(byte WheelPos) {
+  WheelPos = 255 - WheelPos;
+  if(WheelPos < 85) {
+    return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  }
+  if(WheelPos < 170) {
+    WheelPos -= 85;
+    return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+  }
+  WheelPos -= 170;
+  return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+}
+void SonarSensor(int trigPin,int echoPin)
+{
+digitalWrite(trigPin, LOW);
 delayMicroseconds(2);
-// Sets the trigPin on HIGH state for 10 micro seconds
 digitalWrite(trigPin, HIGH);
 delayMicroseconds(10);
 digitalWrite(trigPin, LOW);
-// Reads the echoPin, returns the sound wave travel time in microseconds
 duration = pulseIn(echoPin, HIGH);
-// Calculating the distance
-distance= duration*0.034/2;
-// Prints the distance on the Serial Monitor
-Serial.print("Distance: ");
-Serial.println(distance);
-if (distance <= 10){
+distance = (duration/2) / 29.1;
+}
 
-  // The first NeoPixel in a strand is #0, second is 1, all the way up
-  // to the count of pixels minus one.
-  for(int i=0; i<NUMPIXELS; i++) { // For each pixel...
+void loop() {
+strip.clear();  
+SonarSensor(trigPin1, echoPin1);
+RightSensor = distance;
+SonarSensor(trigPin2, echoPin2);
+LeftSensor = distance;
+
+
+Serial.print(LeftSensor);
+Serial.print(" - ");
+Serial.println(RightSensor);
+
+if (LeftSensor <= 45){
+for(int i=0; i<=NUMPIXELS; i++ ) { // For each pixel...
 
     // pixels.Color() takes RGB values, from 0,0,0 up to 255,255,255
     // Here we're using a moderately bright green color:
-    pixels.setPixelColor(i, pixels.Color(255, 255, 0));
+    strip.setPixelColor(i, strip.Color(255, 0, 125));
 
-    pixels.show();   // Send the updated pixel colors to the hardware.
+    strip.show();   // Send the updated pixel colors to the hardware.
 
     delay (DELAYVAL); // Pause before next pass through loop
   }
-  delay (5000);
-  for(int i=0; i<NUMPIXELS; i++)
+  delay (10);
+  rainbowCycle(1);
+  for(int i=0; i<=NUMPIXELS; i++)
   {
-    pixels.setPixelColor(i, pixels.Color(0,0,0));
-    pixels.show();
+    strip.setPixelColor(i, strip.Color(0,0,0));
+    strip.show();
     delay (DELAYVAL);
   }}
- 
-  
+
+  else if (RightSensor <= 45){
+    
+    for(int i=NUMPIXELS; i; i-- ) { // For each pixel...
+
+    // pixels.Color() takes RGB values, from 0,0,0 up to 255,255,255
+    // Here we're using a moderately bright green color:
+    strip.setPixelColor(i, strip.Color(0, 255, 255));
+
+   strip.show();   // Send the updated pixel colors to the hardware.
+
+    delay (DELAYVAL); // Pause before next pass through loop
+  }
+  rainbowCycle(1);
+  for(int i=NUMPIXELS; i; i--)
+  {
+    strip.setPixelColor(i, strip.Color(0,0,0));
+    strip.show();
+    delay (DELAYVAL);}}
 }
+  
