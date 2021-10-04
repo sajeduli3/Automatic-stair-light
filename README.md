@@ -7,4 +7,4 @@ YOu must have installed Adafruit_NeoPixel library. for installed this library  p
 
 
 ![Stair light](https://user-images.githubusercontent.com/50138015/116307571-5073db80-a7c8-11eb-855f-89085ba48865.jpg)
-![screenshot] (https://raw.githubusercontent.com/sajeduli3/dotfile/main/.config/screenshot/Tue%20Oct%20%205%2001%3A54%3A17%20AM%20%2B06%202021.png)
+![screenshot](https://raw.githubusercontent.com/sajeduli3/dotfile/main/.config/screenshot/Tue%20Oct%20%205%2001%3A54%3A17%20AM%20%2B06%202021.png?raw=true)
